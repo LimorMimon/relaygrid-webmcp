@@ -4,7 +4,7 @@
 
 RelayGrid is designed to be controlled from the ChatGPT conversation while the live site is open in ChatGPT's in-app browser. The website does not contain a separate chatbot.
 
-**Public demo video:** https://youtu.be/N6PoXEHrVbA
+**Public demo video:** https://youtu.be/bKLP4Xd55Ws
 
 ## Setup
 
@@ -131,7 +131,7 @@ Choose the relevant scenario tab in the on-page guide for its ordered, copy-read
 
 Each step has a numbered position plus a meaningful operation title. The expanded current step places the full-width **Copy to chat** button above its prompt. Every step has its own precise **Expected** result covering visible output, status transitions, Preview safety, Audit creation, or unchanged state as applicable; there is no generic scenario-level outcome. When Preview is active, a compact live summary remains visible at the top of the guide.
 
-| Tab              | Operation titles                                                                                                                                                                                                                                   |https://youtu.be/bKLP4Xd55Wshttps://youtu.be/bKLP4Xd55Ws
+| Tab              | Operation titles                                                                                                                                                                                                                                   |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Main scenario    | Filter; Verify one result; Preview; Confirm; Next batch; Undo                                                                                                                                                                                      |
 | Review → Approve | Show warning and follow-up cases; Verify a warning case; Preview sending cases to review; Send the visible cases to review; Show cases awaiting clinical review; Verify a reviewed case; Preview approval after review; Approve the reviewed cases |
