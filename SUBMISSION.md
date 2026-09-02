@@ -1,5 +1,12 @@
 # Devpost submission draft
 
+## Project links
+
+- Live app: https://smart-grid-agent.asasaasaasas.chatgpt.site/
+- Public source: https://github.com/LimorMimon/relaygrid-webmcp
+- Judge instructions: https://github.com/LimorMimon/relaygrid-webmcp/blob/main/JUDGE_TESTING.md
+- Verified QA results: https://github.com/LimorMimon/relaygrid-webmcp/blob/main/QA_RESULTS.md
+
 ## One-line summary
 
 **RelayGrid turns complex enterprise worklists into a shared human-agent control surface: ChatGPT builds a schema-grounded query, while the application deterministically filters, previews, executes, audits, and reverses actions in the same live interface.**
@@ -33,10 +40,13 @@ The page registers imperative tools using `document.modelContext.registerTool()`
 - Compact scenario tabs with meaningful operation titles and consistent full-width **Copy to chat** controls above every prompt.
 - An in-product **How WebMCP works** explanation with the complete schema-to-AST-to-GUI responsibility flow.
 - Domain-neutral architecture demonstrated through healthcare.
+- Native Chrome WebMCP verification of all four guided scenarios: six tools discovered through `document.modelContext.getTools()` and invoked through `document.modelContext.executeTool()` against the published site.
 
 ## How to test
 
 Open the live site in ChatGPT's in-app browser. The sticky right-side **Judge Demo Guide** opens on the **Main scenario** tab with six prompts: Filter, verify why one result matched, Preview current batch, Confirm, Preview next batch, and Undo latest batch. Separate tabs provide ordered flows for Review → Approve, Cancel → Undo, and invalid input while the worklist remains visible. The current step expands with its **Copy to chat** control, prompt, and expected result; completed and future steps stay compact. A live Preview summary appears at the top of the guide. `JUDGE_TESTING.md` contains the complete transition, batch-scope, and safety matrix.
+
+No GitHub account, deploy key, access token, or project credential is required to open the app or inspect the source.
 
 ## What's next
 
