@@ -3,7 +3,7 @@
 ## Project links
 
 - Live app: https://smart-grid-agent.asasaasaasas.chatgpt.site/
-- Public demo video: https://youtu.be/N6PoXEHrVbA
+- Public demo video: https://youtu.be/bKLP4Xd55Ws
 - Public source: https://github.com/LimorMimon/relaygrid-webmcp
 - Judge instructions: https://github.com/LimorMimon/relaygrid-webmcp/blob/main/JUDGE_TESTING.md
 - Verified QA results: https://github.com/LimorMimon/relaygrid-webmcp/blob/main/QA_RESULTS.md
