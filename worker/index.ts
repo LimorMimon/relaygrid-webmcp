@@ -40,7 +40,18 @@ const worker = {
       }, allowedWidths);
     }
 
-    return handler.fetch(request, env, ctx);
+    const response = await handler.fetch(request, env, ctx);
+    const headers = new Headers(response.headers);
+
+    // WebMCP is exposed only to origin-isolated documents.
+    headers.set("Origin-Agent-Cluster", "?1");
+    headers.set("Permissions-Policy", "tools=(self)");
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   },
 };
 

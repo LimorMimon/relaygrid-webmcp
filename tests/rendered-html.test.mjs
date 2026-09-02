@@ -29,5 +29,7 @@ test("renders development preview metadata", async () => {
     response.headers.get("content-type") ?? "",
     /^text\/html\b/i,
   );
+  assert.equal(response.headers.get("origin-agent-cluster"), "?1");
+  assert.equal(response.headers.get("permissions-policy"), "tools=(self)");
   assert.match(await response.text(), developmentPreviewMeta);
 });
