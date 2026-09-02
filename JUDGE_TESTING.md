@@ -4,6 +4,8 @@
 
 RelayGrid is designed to be controlled from the ChatGPT conversation while the live site is open in ChatGPT's in-app browser. The website does not contain a separate chatbot.
 
+**Public demo video:** https://youtu.be/N6PoXEHrVbA
+
 ## Setup
 
 1. Open the live RelayGrid URL in ChatGPT's in-app browser.
