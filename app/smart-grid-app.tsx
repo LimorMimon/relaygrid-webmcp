@@ -683,14 +683,15 @@ export default function SmartGridApp() {
           const recordId = live.current.results[0]?.id;
           if (!recordId) throw Error("Native query returned no records");
           await invoke("explain_record", { recordId });
-          const firstPreview = (await invoke("preview_batch_action", {
+          await invoke("preview_batch_action", {
             action: "approve",
             requestSummary: "Preview approving the current visible batch",
-          })) as { id?: string };
-          if (!firstPreview?.id) throw Error("Native preview returned no preview id");
+          });
           await pause();
+          const previewId = live.current.preview?.id;
+          if (!previewId) throw Error("Native preview returned no preview id");
           await invoke("execute_batch_action", {
-            previewId: firstPreview.id,
+            previewId,
             humanConfirmed: true,
           });
           await pause();
