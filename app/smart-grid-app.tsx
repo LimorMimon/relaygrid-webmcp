@@ -72,6 +72,7 @@ type Tool = {
   inputSchema?: object;
   execute: (input?: unknown) => unknown;
 };
+type RegisteredTool = { name: string };
 declare global {
   interface Document {
     modelContext?: {
@@ -79,6 +80,8 @@ declare global {
         tool: Tool,
         options?: { signal?: AbortSignal },
       ): Promise<void>;
+      getTools(): Promise<RegisteredTool[]>;
+      executeTool(tool: RegisteredTool, input: string): Promise<unknown>;
     };
   }
 }
@@ -584,7 +587,132 @@ export default function SmartGridApp() {
         document.modelContext!.registerTool(t, { signal: c.signal }),
       ),
     )
-      .then(() => setReady(true))
+      .then(async () => {
+        setReady(true);
+        if (new URLSearchParams(window.location.search).get("webmcp_test") !== "1")
+          return;
+
+        const root = document.documentElement;
+        if (root.dataset.webmcpSelfTest === "running") return;
+        root.dataset.webmcpSelfTest = "running";
+
+        try {
+          const modelContext = document.modelContext!,
+            discovered = await modelContext.getTools(),
+            byName = new Map(discovered.map((tool) => [tool.name, tool])),
+            calls: Array<{ name: string; result: unknown }> = [],
+            invoke = async (name: string, input: object = {}) => {
+              const tool = byName.get(name);
+              if (!tool) throw Error(`Native WebMCP tool not discovered: ${name}`);
+              const result = await modelContext.executeTool(
+                tool,
+                JSON.stringify(input),
+              );
+              calls.push({ name, result });
+              return result;
+            },
+            pause = () => new Promise((resolve) => setTimeout(resolve, 120));
+
+          await invoke("describe_grid", {
+            userRequest: "Run the native WebMCP QA scenario",
+            requestStatus: "clear",
+          });
+          await invoke("apply_query", {
+            requestSummary:
+              "Pending CT or MRI results from the last 7 days, excluding urgent cases and warnings, oldest first",
+            root: {
+              kind: "group",
+              operator: "AND",
+              children: [
+                {
+                  kind: "condition",
+                  field: "status",
+                  operator: "eq",
+                  value: "Pending",
+                },
+                {
+                  kind: "group",
+                  operator: "OR",
+                  children: [
+                    {
+                      kind: "condition",
+                      field: "department",
+                      operator: "eq",
+                      value: "CT",
+                    },
+                    {
+                      kind: "condition",
+                      field: "department",
+                      operator: "eq",
+                      value: "MRI",
+                    },
+                  ],
+                },
+                {
+                  kind: "condition",
+                  field: "createdAt",
+                  operator: "after",
+                  value: "2026-08-22",
+                },
+                {
+                  kind: "not",
+                  child: {
+                    kind: "condition",
+                    field: "priority",
+                    operator: "eq",
+                    value: "Urgent",
+                  },
+                },
+                {
+                  kind: "not",
+                  child: {
+                    kind: "condition",
+                    field: "warning",
+                    operator: "eq",
+                    value: true,
+                  },
+                },
+              ],
+            },
+            sort: [
+              { field: "createdAt", direction: "asc" },
+              { field: "id", direction: "asc" },
+            ],
+          });
+          await pause();
+          const recordId = live.current.results[0]?.id;
+          if (!recordId) throw Error("Native query returned no records");
+          await invoke("explain_record", { recordId });
+          const firstPreview = (await invoke("preview_batch_action", {
+            action: "approve",
+            requestSummary: "Preview approving the current visible batch",
+          })) as { id?: string };
+          if (!firstPreview?.id) throw Error("Native preview returned no preview id");
+          await pause();
+          await invoke("execute_batch_action", {
+            previewId: firstPreview.id,
+            humanConfirmed: true,
+          });
+          await pause();
+          await invoke("preview_batch_action", {
+            action: "approve",
+            requestSummary: "Preview the next visible batch",
+          });
+          await pause();
+          await invoke("undo_last_batch");
+
+          root.dataset.webmcpSelfTest = JSON.stringify({
+            status: "passed",
+            discovered: discovered.map((tool) => tool.name).sort(),
+            calls,
+          });
+        } catch (error) {
+          root.dataset.webmcpSelfTest = JSON.stringify({
+            status: "failed",
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })
       .catch(() => setReady(false));
     return () => c.abort();
   }, [reject]);
