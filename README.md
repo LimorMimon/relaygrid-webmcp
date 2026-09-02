@@ -86,6 +86,8 @@ Before the first request, the right panel contains only **No active agent query*
 
 For the exact prompts, valid commands by stage, transition table, and expected results, see [JUDGE_TESTING.md](JUDGE_TESTING.md). See [QA_RESULTS.md](QA_RESULTS.md) for the verified regression and browser checks.
 
+All four guided scenarios have been verified against the published site with native Chrome WebMCP: all six tools were discovered through `document.modelContext.getTools()` and invoked through `document.modelContext.executeTool()`. The full calls and deterministic results are documented in [QA_RESULTS.md](QA_RESULTS.md).
+
 The published site and this repository are public. Viewing or judging RelayGrid requires no deploy key, access token, or private repository permission.
 
 Requires Node.js 22.13 or newer.

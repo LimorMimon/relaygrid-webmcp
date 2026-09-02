@@ -15,6 +15,10 @@ If **WebMCP connected** does not appear, the current ChatGPT account or environm
 
 The live site and source repository are public. Judges do not need a GitHub account, deploy key, access token, or any other project credential.
 
+## Verified WebMCP status
+
+Before submission, all four guided scenarios were run from clean synthetic sessions against the published site using native Chrome WebMCP. `document.modelContext.getTools()` discovered all six published tools, and the scenarios invoked them through `document.modelContext.executeTool()` rather than a mocked browser API. Main completed Filter → Verify → Preview → Execute → Next batch → Undo; Review completed Send to Review → Approve; Cancel completed Cancel → Undo; and the Negative test rejected unsupported input with no changes. The exact calls and deterministic counts are recorded in [QA_RESULTS.md](QA_RESULTS.md).
+
 All records are synthetic. **Reset session** is optional when running a single scenario, and it should not be used during that scenario. When switching to another independent scenario, click **Reset & start this scenario** if it appears before sending the new scenario's first prompt. This is especially important after executing a batch action, because Reset restores the original synthetic dataset and deterministic starting state. If the previous scenario created only a filter or Preview, the next scenario's first query can replace it without changing records, but using the contextual Reset keeps the scenarios isolated. No reset prompt appears in a clean session.
 
 The four scenario tabs, the primary **Reset session** control, and the contextual **Reset & start this scenario** control use a hand cursor, visible hover and keyboard-focus feedback, and a descriptive hover hint. The primary Reset remains clickable even in a clean session; its hint then explains that the session is already at its initial state. The contextual Reset appears only after query, Preview, selection, audit, notice, or guide-progress state exists and the judge switches scenario tabs.
