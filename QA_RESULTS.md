@@ -18,7 +18,8 @@ The verified experience supports the submission's central claim: ChatGPT builds 
 
 ## Browser and WebMCP checks
 
-- In a controlled browser harness that provides `document.modelContext`, all six WebMCP tools register successfully and can be invoked through the page's published schemas. Native discovery in ChatGPT Site tools requires a supported ChatGPT account and environment and was not available in this test session.
+- Native WebMCP was verified against the published site in Chrome with **WebMCP support in DevTools** and **WebMCP testing** enabled. The page reported **WebMCP connected**, `document.modelContext.getTools()` discovered all six published tools, and the scenarios invoked them through `document.modelContext.executeTool()` rather than a mocked browser API.
+- The published response includes the WebMCP prerequisites `Origin-Agent-Cluster: ?1` and `Permissions-Policy: tools=(self)`.
 - The six-step Judge Demo Guide identifies the primary flow as **Main scenario — Filter → Verify → Approve → Next batch → Undo** and starts at Step 1.
 - All four guide tabs track successful WebMCP calls: completed steps show green checks, the next step is blue, future steps are gray, and Reset clears the counters.
 - The guide is a sticky right-side progressive stepper: only the current prompt expands, the grid remains near the top of the work surface, and a compact live Preview summary appears beside it.
@@ -37,6 +38,19 @@ The verified experience supports the submission's central claim: ChatGPT builds 
 - Flag badges use high-contrast text, backgrounds, and borders for Warning and Follow-up; records without flags show a visible dash.
 - **Reset session** restores the original records and clears query, Preview, audit, query history, selection, notices, and guide progress so the guide returns to Step 1. It is optional within one scenario; when switching to another independent scenario, the contextual **Reset & start this scenario** control isolates the new run and restores deterministic starting data.
 - The primary **Reset session** control is visibly button-shaped and remains clickable in both active and clean sessions, with a state-specific hint. The contextual **Reset & start this scenario** control appears after query, Preview, selection, audit, notice, or guide-progress state when the scenario changes. Both controls provide a hand cursor, hover feedback, keyboard-focus feedback, and descriptive hints.
+
+## Native Chrome WebMCP scenario results
+
+The four guided scenarios were run from a clean synthetic session against the published site. Every scenario discovered exactly these six native tools: `describe_grid`, `apply_query`, `explain_record`, `preview_batch_action`, `execute_batch_action`, and `undo_last_batch`.
+
+| Scenario | Native result |
+| --- | --- |
+| Main scenario | `apply_query` returned 605 matches; `explain_record` verified the first visible record; Approve Preview planned a 50-record batch without mutation; confirmed Execute changed 50 records and exposed the next batch; Undo succeeded. |
+| Review → Approve | The first query returned 467 matches; Send to Review Preview and Execute processed a 50-record batch; the replacement Needs Review query returned 556 matches; Approve Preview and Execute processed another 50-record batch. |
+| Cancel → Undo | The query returned 349 matches; Cancel Preview and Execute processed a 50-record batch; Undo succeeded. |
+| Negative test | `describe_grid` rejected `asdf qqq 123 ???` as unclear and returned `noChangesMade: true`. |
+
+These checks verify real tool discovery, schema-based invocation, shared page-state updates, Preview safety, confirmed execution, next-batch progression, and Undo. The earlier controlled browser harness remains useful for repeatable UI regression coverage, but it is not the basis for the native WebMCP claim above.
 
 ## Verified deterministic examples
 

@@ -13,6 +13,8 @@ RelayGrid is designed to be controlled from the ChatGPT conversation while the l
 
 If **WebMCP connected** does not appear, the current ChatGPT account or environment has not exposed Site tools to the page. A text-only ChatGPT response is not a valid WebMCP test; use a supported Site tools environment before continuing.
 
+The live site and source repository are public. Judges do not need a GitHub account, deploy key, access token, or any other project credential.
+
 All records are synthetic. **Reset session** is optional when running a single scenario, and it should not be used during that scenario. When switching to another independent scenario, click **Reset & start this scenario** if it appears before sending the new scenario's first prompt. This is especially important after executing a batch action, because Reset restores the original synthetic dataset and deterministic starting state. If the previous scenario created only a filter or Preview, the next scenario's first query can replace it without changing records, but using the contextual Reset keeps the scenarios isolated. No reset prompt appears in a clean session.
 
 The four scenario tabs, the primary **Reset session** control, and the contextual **Reset & start this scenario** control use a hand cursor, visible hover and keyboard-focus feedback, and a descriptive hover hint. The primary Reset remains clickable even in a clean session; its hint then explains that the session is already at its initial state. The contextual Reset appears only after query, Preview, selection, audit, notice, or guide-progress state exists and the judge switches scenario tabs.
