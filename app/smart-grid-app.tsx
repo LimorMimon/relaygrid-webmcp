@@ -611,99 +611,181 @@ export default function SmartGridApp() {
               calls.push({ name, result });
               return result;
             },
-            pause = () => new Promise((resolve) => setTimeout(resolve, 120));
+            pause = () => new Promise((resolve) => setTimeout(resolve, 120)),
+            scenario =
+              new URLSearchParams(window.location.search).get("webmcp_scenario") ??
+              "main",
+            applyAndExplain = async (spec: object) => {
+              await invoke("apply_query", spec);
+              await pause();
+              const recordId = live.current.results[0]?.id;
+              if (!recordId) throw Error("Native query returned no records");
+              await invoke("explain_record", { recordId });
+            },
+            previewAndExecute = async (
+              action: BatchAction,
+              requestSummary: string,
+            ) => {
+              await invoke("preview_batch_action", { action, requestSummary });
+              await pause();
+              const previewId = live.current.preview?.id;
+              if (!previewId) throw Error("Native preview returned no preview id");
+              await invoke("execute_batch_action", {
+                previewId,
+                humanConfirmed: true,
+              });
+              await pause();
+            };
 
           await invoke("describe_grid", {
-            userRequest: "Run the native WebMCP QA scenario",
-            requestStatus: "clear",
+            userRequest:
+              scenario === "negative"
+                ? "asdf qqq 123 ???"
+                : `Run the native WebMCP ${scenario} QA scenario`,
+            requestStatus: scenario === "negative" ? "unclear" : "clear",
           });
-          await invoke("apply_query", {
-            requestSummary:
-              "Pending CT or MRI results from the last 7 days, excluding urgent cases and warnings, oldest first",
-            root: {
-              kind: "group",
-              operator: "AND",
-              children: [
-                {
-                  kind: "condition",
-                  field: "status",
-                  operator: "eq",
-                  value: "Pending",
-                },
-                {
-                  kind: "group",
-                  operator: "OR",
-                  children: [
-                    {
-                      kind: "condition",
-                      field: "department",
-                      operator: "eq",
-                      value: "CT",
-                    },
-                    {
-                      kind: "condition",
-                      field: "department",
-                      operator: "eq",
-                      value: "MRI",
-                    },
-                  ],
-                },
-                {
-                  kind: "condition",
-                  field: "createdAt",
-                  operator: "after",
-                  value: "2026-08-22",
-                },
-                {
-                  kind: "not",
-                  child: {
-                    kind: "condition",
-                    field: "priority",
-                    operator: "eq",
-                    value: "Urgent",
+          if (scenario === "negative") {
+            await pause();
+          } else if (scenario === "cancel") {
+            await applyAndExplain({
+              requestSummary:
+                "Routine pending X-Ray or Ultrasound results from the last 7 days, excluding warnings and follow-up flags, oldest first",
+              root: {
+                kind: "group",
+                operator: "AND",
+                children: [
+                  { kind: "condition", field: "status", operator: "eq", value: "Pending" },
+                  { kind: "condition", field: "priority", operator: "eq", value: "Routine" },
+                  {
+                    kind: "group",
+                    operator: "OR",
+                    children: [
+                      { kind: "condition", field: "department", operator: "eq", value: "X-Ray" },
+                      { kind: "condition", field: "department", operator: "eq", value: "Ultrasound" },
+                    ],
                   },
-                },
-                {
-                  kind: "not",
-                  child: {
-                    kind: "condition",
-                    field: "warning",
-                    operator: "eq",
-                    value: true,
-                  },
-                },
+                  { kind: "condition", field: "createdAt", operator: "after", value: "2026-08-22" },
+                  { kind: "not", child: { kind: "condition", field: "warning", operator: "eq", value: true } },
+                  { kind: "not", child: { kind: "condition", field: "followUp", operator: "eq", value: true } },
+                ],
+              },
+              sort: [
+                { field: "createdAt", direction: "asc" },
+                { field: "id", direction: "asc" },
               ],
-            },
-            sort: [
-              { field: "createdAt", direction: "asc" },
-              { field: "id", direction: "asc" },
-            ],
-          });
-          await pause();
-          const recordId = live.current.results[0]?.id;
-          if (!recordId) throw Error("Native query returned no records");
-          await invoke("explain_record", { recordId });
-          await invoke("preview_batch_action", {
-            action: "approve",
-            requestSummary: "Preview approving the current visible batch",
-          });
-          await pause();
-          const previewId = live.current.preview?.id;
-          if (!previewId) throw Error("Native preview returned no preview id");
-          await invoke("execute_batch_action", {
-            previewId,
-            humanConfirmed: true,
-          });
-          await pause();
-          await invoke("preview_batch_action", {
-            action: "approve",
-            requestSummary: "Preview the next visible batch",
-          });
-          await pause();
-          await invoke("undo_last_batch");
+            });
+            await previewAndExecute(
+              "cancel",
+              "Preview cancelling the current visible batch",
+            );
+            await invoke("undo_last_batch");
+          } else if (scenario === "review") {
+            await applyAndExplain({
+              requestSummary:
+                "Pending CT or MRI results from the last 14 days with warnings or follow-up flags, excluding urgent cases, oldest first",
+              root: {
+                kind: "group",
+                operator: "AND",
+                children: [
+                  { kind: "condition", field: "status", operator: "eq", value: "Pending" },
+                  {
+                    kind: "group",
+                    operator: "OR",
+                    children: [
+                      { kind: "condition", field: "department", operator: "eq", value: "CT" },
+                      { kind: "condition", field: "department", operator: "eq", value: "MRI" },
+                    ],
+                  },
+                  { kind: "condition", field: "createdAt", operator: "after", value: "2026-08-15" },
+                  {
+                    kind: "group",
+                    operator: "OR",
+                    children: [
+                      { kind: "condition", field: "warning", operator: "eq", value: true },
+                      { kind: "condition", field: "followUp", operator: "eq", value: true },
+                    ],
+                  },
+                  { kind: "not", child: { kind: "condition", field: "priority", operator: "eq", value: "Urgent" } },
+                ],
+              },
+              sort: [
+                { field: "createdAt", direction: "asc" },
+                { field: "id", direction: "asc" },
+              ],
+            });
+            await previewAndExecute(
+              "send_to_review",
+              "Preview sending the current visible batch to review",
+            );
+            await applyAndExplain({
+              requestSummary:
+                "CT or MRI records that currently need review, oldest first",
+              root: {
+                kind: "group",
+                operator: "AND",
+                children: [
+                  { kind: "condition", field: "status", operator: "eq", value: "Needs Review" },
+                  {
+                    kind: "group",
+                    operator: "OR",
+                    children: [
+                      { kind: "condition", field: "department", operator: "eq", value: "CT" },
+                      { kind: "condition", field: "department", operator: "eq", value: "MRI" },
+                    ],
+                  },
+                ],
+              },
+              sort: [
+                { field: "createdAt", direction: "asc" },
+                { field: "id", direction: "asc" },
+              ],
+            });
+            await previewAndExecute(
+              "approve",
+              "Preview approving the current visible batch after review",
+            );
+          } else {
+            await applyAndExplain({
+              requestSummary:
+                "Pending CT or MRI results from the last 7 days, excluding urgent cases and warnings, oldest first",
+              root: {
+                kind: "group",
+                operator: "AND",
+                children: [
+                  { kind: "condition", field: "status", operator: "eq", value: "Pending" },
+                  {
+                    kind: "group",
+                    operator: "OR",
+                    children: [
+                      { kind: "condition", field: "department", operator: "eq", value: "CT" },
+                      { kind: "condition", field: "department", operator: "eq", value: "MRI" },
+                    ],
+                  },
+                  { kind: "condition", field: "createdAt", operator: "after", value: "2026-08-22" },
+                  { kind: "not", child: { kind: "condition", field: "priority", operator: "eq", value: "Urgent" } },
+                  { kind: "not", child: { kind: "condition", field: "warning", operator: "eq", value: true } },
+                ],
+              },
+              sort: [
+                { field: "createdAt", direction: "asc" },
+                { field: "id", direction: "asc" },
+              ],
+            });
+            await previewAndExecute(
+              "approve",
+              "Preview approving the current visible batch",
+            );
+            await invoke("preview_batch_action", {
+              action: "approve",
+              requestSummary: "Preview the next visible batch",
+            });
+            await pause();
+            await invoke("undo_last_batch");
+          }
 
           root.dataset.webmcpSelfTest = JSON.stringify({
             status: "passed",
+            scenario,
             discovered: discovered.map((tool) => tool.name).sort(),
             calls,
           });
