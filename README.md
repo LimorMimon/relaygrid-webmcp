@@ -6,7 +6,7 @@
 
 RelayGrid is a WebMCP-enabled enterprise worklist demonstrating how a human and an agent can safely find, understand, preview, and act on complex records in the same live interface. The demo uses 7,500 fully synthetic radiology records; the architecture is domain-neutral.
 
-**Public demo video:** https://youtu.be/N6PoXEHrVbA
+**Public demo video:** https://youtu.be/bKLP4Xd55Ws
 
 ## Why WebMCP
 
