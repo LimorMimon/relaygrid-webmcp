@@ -57,7 +57,7 @@ flowchart TD
 - After execution, the active query remains in place and the next eligible batch fills the table automatically.
 - `Approved` and `Cancelled` records are protected; warnings prevent direct approval of `Pending` records until review.
 - Every execution creates a reversible audit entry.
-- All demo data is synthetic.
+- All demo data is synthetic.https://youtu.be/bKLP4Xd55Ws
 
 ## Guided judge flow
 
