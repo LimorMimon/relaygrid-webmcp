@@ -6,7 +6,7 @@
 
 RelayGrid is a WebMCP-enabled enterprise worklist demonstrating how a human and an agent can safely find, understand, preview, and act on complex records in the same live interface. The demo uses 7,500 fully synthetic radiology records; the architecture is domain-neutral.
 
-**Public demo video:** https://youtu.be/bKLP4Xd55Ws
+**Public demo video:** https://youtu.be/oCanCJGC3z8
 
 ## Why WebMCP
 
@@ -57,7 +57,7 @@ flowchart TD
 - After execution, the active query remains in place and the next eligible batch fills the table automatically.
 - `Approved` and `Cancelled` records are protected; warnings prevent direct approval of `Pending` records until review.
 - Every execution creates a reversible audit entry.
-- All demo data is synthetic.https://youtu.be/bKLP4Xd55Ws
+- All demo data is synthetic.
 
 ## Guided judge flow
 
